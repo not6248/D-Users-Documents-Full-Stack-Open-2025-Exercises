@@ -45,7 +45,7 @@ const App = () => {
 
   const filterPersons = filter.length === 0 
   ? persons 
-  : persons.filter(person => person.name.toLowerCase().includes(filter))
+  : persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
 
   return (
     <div>
