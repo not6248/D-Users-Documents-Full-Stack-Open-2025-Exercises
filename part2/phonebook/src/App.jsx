@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
-import axios from "axios";
 import personService from "./services/persons";
 import Notification from "./components/Notification";
 
@@ -50,7 +49,7 @@ const App = () => {
               setMessage(null)
             }, 5000);
           })
-          .catch(error => {
+          .catch(() => {
             setErrorMessage(`infomation of ${findPerson.name} has already been removed from server`)
             setTimeout(() => {
               setErrorMessage(null)
