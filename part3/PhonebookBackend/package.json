@@ -8,13 +8,15 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:ui": "rm -rf dist && cd ../../part2/phonebook && npm run build && cp -r dist ../../part3/PhonebookBackend",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
-    "full:setup":"npm i && cd ../../part2/phonebook && npm i && cd ../../part3/PhonebookBackend && npm run build:ui"
+    "full:setup": "npm i && cd ../../part2/phonebook && npm i && cd ../../part3/PhonebookBackend && npm run build:ui"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "mongoose": "^8.17.1",
     "morgan": "^1.10.1"
   }
 }
