@@ -33,7 +33,7 @@ app.get("/api/persons", (request, response, next) => {
     .catch((error) => next(error))
 })
 
-app.get("/info", (request, response, error) => {
+app.get("/info", (request, response, next) => {
   const date = new Date()
   let dateText = date.toString()
 
@@ -66,8 +66,7 @@ app.delete("/api/persons/:id", (request, response, next) => {
     .catch((error) => next(error))
 })
 
-app.post("/api/persons", (request, response, error) => {
-  const randomId = Math.floor(Math.random() * 9999999999)
+app.post("/api/persons", (request, response, next) => {
   const body = request.body
 
   if (!body.name || !body.number) {
@@ -113,6 +112,8 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
   }
 
   next(error)

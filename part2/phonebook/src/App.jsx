@@ -73,15 +73,23 @@ const App = () => {
       name: newName,
       number: newNumber,
     }
-    personService.create(person).then((returnedPerson) => {
-      setPersons(persons.concat(returnedPerson))
-      setNewName("")
-      setNewNumber("")
-      setMessage(`Added ${returnedPerson.name}`)
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
-    })
+    personService
+      .create(person)
+      .then((returnedPerson) => {
+        setPersons(persons.concat(returnedPerson))
+        setNewName("")
+        setNewNumber("")
+        setMessage(`Added ${returnedPerson.name}`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
+      })
+      .catch((error) => {
+        setErrorMessage(`Added ${error.response.data.error}`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
   }
 
   const deletePerson = (id, name) => {
