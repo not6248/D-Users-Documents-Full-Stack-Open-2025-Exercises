@@ -23,6 +23,9 @@ blogsRouter.post('/', async (request, response) => {
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token invalid' })
   }
+
+  // Modify adding new blogs so that it is only possible if a valid token is sent with the HTTP POST request. 
+  // The user identified by the token is designated as the creator of the blog.
   const user = await User.findById(decodedToken.id)
 
   if (!user) {
