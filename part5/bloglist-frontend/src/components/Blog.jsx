@@ -23,7 +23,7 @@ const Blog = ({ addLike, blog }) => {
     const updateBlog = {
       ...blog,
       likes: blog.likes + 1,
-      user: blog.user.id,
+      user: blog?.user?.id,
     }
     addLike(updateBlog)
   }
