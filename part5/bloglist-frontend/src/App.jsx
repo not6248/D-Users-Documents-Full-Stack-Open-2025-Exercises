@@ -16,7 +16,10 @@ const App = () => {
   const blogFormRef = useRef()
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs))
+    blogService.getAll().then((blogs) => {
+      blogs.sort((a , b) => b.likes - a.likes)
+      setBlogs(blogs)
+    })
   }, [])
 
   useEffect(() => {
@@ -77,13 +80,11 @@ const App = () => {
 
   const addLike = async (blogObject) => {
     try {
-      // 5.9 ยังไม่แสดงชื่อคน เหมือนในโจทมีบอก
-
       const returnedBlog = await blogService.update(blogObject)
       setBlogs((prevItems) =>
         prevItems.map((blog) =>
           blog.id === returnedBlog.id ? returnedBlog : blog
-        )
+        ).sort((a , b) => b.likes - a.likes)
       )
     } catch {
       setErrorMessage(`has error`)
