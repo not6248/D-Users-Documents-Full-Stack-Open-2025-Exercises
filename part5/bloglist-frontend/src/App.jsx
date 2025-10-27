@@ -75,6 +75,25 @@ const App = () => {
     }
   }
 
+  const addLike = async (blogObject) => {
+    try {
+      // 5.9 ยังไม่แสดงชื่อคน เหมือนในโจทมีบอก
+
+      const returnedBlog = await blogService.update(blogObject)
+      setBlogs((prevItems) =>
+        prevItems.map((blog) =>
+          blog.id === returnedBlog.id ? returnedBlog : blog
+        )
+      )
+    } catch {
+      setErrorMessage(`has error`)
+
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 3000)
+    }
+  }
+
   if (user === null) {
     return (
       <div>
@@ -125,9 +144,7 @@ const App = () => {
         <BlogForm createBlog={addBlog} />
       </Togglable>
       {blogs.map((blog) => (
-        <div>
-          <Blog key={blog.id} blog={blog} />
-        </div>
+        <Blog addLike={addLike} key={blog.id} blog={blog} />
       ))}
     </div>
   )
