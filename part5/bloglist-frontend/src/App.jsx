@@ -44,9 +44,9 @@ const App = () => {
       setPassword('')
     } catch (ex) {
       if (ex.response.data.error === 'invalid username or password') {
-        setErrorMessage(`wrong username or password`)
+        setErrorMessage('wrong username or password')
       } else {
-        setErrorMessage(`has error`)
+        setErrorMessage('has error')
       }
 
       setTimeout(() => {
@@ -70,7 +70,7 @@ const App = () => {
         setMessage(null)
       }, 3000)
     } catch {
-      setErrorMessage(`has error`)
+      setErrorMessage('has error')
 
       setTimeout(() => {
         setErrorMessage(null)
@@ -87,7 +87,7 @@ const App = () => {
         ).sort((a , b) => b.likes - a.likes)
       )
     } catch {
-      setErrorMessage(`has error`)
+      setErrorMessage('has error')
 
       setTimeout(() => {
         setErrorMessage(null)
@@ -97,11 +97,11 @@ const App = () => {
 
   const deleteBlog = async (id) => {
     try{
-      await blogService.deleteData(id);
-      const newBlogs = blogs.filter(blog => blog.id != id)
+      await blogService.deleteData(id)
+      const newBlogs = blogs.filter(blog => blog.id !== id)
       setBlogs(newBlogs)
     }catch{
-      setErrorMessage(`has error`)
+      setErrorMessage('has error')
 
       setTimeout(() => {
         setErrorMessage(null)
