@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const Blog = ({ addLike, blog }) => {
+const Blog = ({ addLike, deleteBlog, blog }) => {
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -28,6 +28,14 @@ const Blog = ({ addLike, blog }) => {
     addLike(updateBlog)
   }
 
+  const handleRemove = (event) => {
+    event.preventDefault()
+    const isConfirm = confirm(`Remove blog ${blog.title} ${blog.author}`)
+    if (isConfirm) {
+      deleteBlog(blog.id)
+    }
+  }
+
   return (
     <div style={blogStyle}>
       <div>
@@ -43,13 +51,13 @@ const Blog = ({ addLike, blog }) => {
         <div>{blog.url}</div>
         <div>
           <form onSubmit={handleLike}>
-            likes {blog.likes}{' '}
-            <button type='button' onClick={handleLike}>
-              like
-            </button>
+            likes {blog.likes} <button type='submit'>like</button>
           </form>
         </div>
         <div>{blog.user?.name}</div>
+        <form onSubmit={handleRemove}>
+          <button type='submit'>remove</button>
+        </form>
       </div>
     </div>
   )
