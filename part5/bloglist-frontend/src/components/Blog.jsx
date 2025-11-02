@@ -37,7 +37,7 @@ const Blog = ({ addLike, deleteBlog, blog }) => {
   }
 
   return (
-    <div style={blogStyle}>
+    <div className='blog' style={blogStyle}>
       <div>
         {blog.title} {blog.author} {''}
         <button style={hideWhenVisible} onClick={toggleVisibility}>
@@ -47,7 +47,7 @@ const Blog = ({ addLike, deleteBlog, blog }) => {
           hide
         </button>
       </div>
-      <div style={showWhenVisible}>
+      <div className='showWhenVisible' style={showWhenVisible}>
         <div>{blog.url}</div>
         <div>
           <form onSubmit={handleLike}>
