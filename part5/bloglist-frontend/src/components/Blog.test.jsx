@@ -35,3 +35,23 @@ describe('<Blog />', () => {
     expect(div).toBeVisible()
   })
 })
+
+test('clicking the button calls event handler twice', async () => {
+  const blog = {
+    title: 'title for test',
+    author: 'author abc',
+    url: 'www.example.com',
+    likes: 123,
+  }
+
+  const mockHandler = vi.fn()
+
+  render(<Blog blog={blog} addLike={mockHandler} />)
+
+  const user = userEvent.setup()
+  const button = screen.getByText('like')
+  await user.click(button)
+  await user.click(button)
+
+  expect(mockHandler.mock.calls).toHaveLength(2)
+})
