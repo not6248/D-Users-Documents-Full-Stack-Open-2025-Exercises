@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import Blog from './Blog'
 
-test('renders content', () => {
+describe('<Blog />', () => {
   const blog = {
     title: 'title for test',
     author: 'author abc',
@@ -9,11 +10,28 @@ test('renders content', () => {
     likes: 123,
   }
 
-  const { container } = render(<Blog blog={blog} />)
+  let container
 
-  const element = screen.getByText('title for test author abc')
-  expect(element).toBeDefined()
+  beforeEach(() => {
+    container = render(<Blog blog={blog} />).container
+  })
 
-  const div = container.querySelector('.showWhenVisible')
-  expect(div).not.toBeVisible()
+  test('renders content', () => {
+    screen.getByText('title for test author abc')
+  })
+
+  test('at start the children are not displayed', () => {
+    const div = container.querySelector('.showWhenVisible')
+    expect(div).not.toBeVisible()
+  })
+
+  test('after clicking the button, children are displayed', async () => {
+    const user = userEvent.setup()
+    const button = screen.getByText('view')
+    await user.click(button)
+
+    const div = container.querySelector('.showWhenVisible')
+
+    expect(div).toBeVisible()
+  })
 })
