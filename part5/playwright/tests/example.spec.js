@@ -1,4 +1,5 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
+import Blog from '../../bloglist-frontend/src/components/Blog';
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
@@ -65,4 +66,28 @@ describe('Blog app', () => {
         await expect(addNotiDiv).toContainText('a new blog a blog created by playwright')
     })
   })
+
+    describe('When created blog', () => {
+      beforeEach(async ({ page }) => {
+        await page.getByLabel('username').fill('mluukkai')
+        await page.getByLabel('password').fill('salainen')
+        await page.getByRole('button', { name: 'login' }).click()
+
+        await page.getByRole('button', { name: 'create new blog' }).click()
+        await page.getByRole('textbox', { name: 'title:' }).fill("a blog created by playwright")
+        await page.getByRole('textbox', { name: 'author:' }).fill("mluukkai")
+        await page.getByRole('textbox', { name: 'url:' }).fill("www.playwright.com")
+        await page.getByRole('button', { name: 'create' }).click()
+      })
+
+      test('blog can be liked', async ({ page }) => {
+        await page.getByRole('button', { name: 'view' }).click()
+        await expect(page.getByText('likes')).toContainText('likes 0 like')
+        await page.getByRole('button', { name: 'like' }).click()
+        await page.getByText("likes 1 like").waitFor()
+        await expect(page.getByText('likes')).toContainText('likes 1 like')
+      })
+  })
+
+  //blog can be liked
 })
