@@ -44,7 +44,7 @@ const App = () => {
       setPassword('')
     } catch (ex) {
       if (ex.response.data.error === 'invalid username or password') {
-        setErrorMessage('wrong username or password')
+        setErrorMessage('wrong credentials')
       } else {
         setErrorMessage('has error')
       }
