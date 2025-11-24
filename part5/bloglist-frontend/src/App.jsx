@@ -37,7 +37,6 @@ const App = () => {
     try {
       const user = await loginService.login({ username, password })
       window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
-      console.log(user)
       blogService.setToken(user.token)
       setUser(user)
       setUsername('')
@@ -159,7 +158,7 @@ const App = () => {
         <BlogForm createBlog={addBlog} />
       </Togglable>
       {blogs.map((blog) => (
-        <Blog addLike={addLike} deleteBlog={deleteBlog} key={blog.id} blog={blog} />
+        <Blog addLike={addLike} deleteBlog={deleteBlog} user={user} key={blog.id} blog={blog} />
       ))}
     </div>
   )

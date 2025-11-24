@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const Blog = ({ addLike, deleteBlog, blog }) => {
+const Blog = ({ addLike, deleteBlog, user, blog }) => {
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -55,9 +55,11 @@ const Blog = ({ addLike, deleteBlog, blog }) => {
           </form>
         </div>
         <div>{blog.user?.name}</div>
-        <form onSubmit={handleRemove}>
-          <button type='submit'>remove</button>
-        </form>
+        {user.name === blog.user?.name && (
+          <form onSubmit={handleRemove}>
+            <button type='submit'>remove</button>
+          </form>
+        )}
       </div>
     </div>
   )
