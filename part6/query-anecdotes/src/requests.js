@@ -10,7 +10,7 @@ export const getAnecdotes = async () => {
   return await response.json()
 }
 
-export const createAnecdotes = async (newAnecdote) => {
+export const createAnecdote = async (newAnecdote) => {
   const options = {
     method: 'POST',
     headers: { 'Content-Type' : 'application/json' },
@@ -26,14 +26,14 @@ export const createAnecdotes = async (newAnecdote) => {
   return await response.json()
 }
 
-export const updateAnecdotes = async (updatedAncdotes) => {
+export const updateAnecdote = async (updatedAncdote) => {
   const options = {
     method: 'PUT',
     headers: { 'Content-Type' : 'application/json' },
-    body: JSON.stringify(updatedAncdotes)
+    body: JSON.stringify(updatedAncdote)
   }
 
-  const response = await fetch (`${baseUrl}/${updatedAncdotes.id}`,options)
+  const response = await fetch (`${baseUrl}/${updatedAncdote.id}`,options)
 
     if(!response.ok){
     throw new Error('Failed to update anecdotes')
