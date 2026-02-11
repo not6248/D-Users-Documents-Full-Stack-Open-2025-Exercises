@@ -18,9 +18,35 @@ const useField = (type) => {
 const useCountry = (name) => {
   const [country, setCountry] = useState(null)
 
-  useEffect(() => {})
+  useEffect(() => {
+    if(!name) return
 
-  return country
+    const callApi = async () => {
+      try {
+        const url = `https://studies.cs.helsinki.fi/restcountries/api/name/${name}`
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+        const result = await response.json();
+        setCountry(result)
+      } catch (error) {
+        setCountry(null);
+      }
+    }
+
+    callApi()
+  },[name])
+
+  return {
+    data:{
+      name:country?.name.common,
+      capital:country?.capital[0],
+      population:country?.population,
+      flag:country?.flags.svg
+    },
+    found: Object.keys(country ?? {})?.length > 0
+  }
 }
 
 const Country = ({ country }) => {
