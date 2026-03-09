@@ -23,7 +23,7 @@ const mostBlogs = (blogs) => {
   const counts = _.countBy(blogs, 'author')
   const [name, count] = _.maxBy(
     Object.entries(counts),
-    ([name, count]) => count
+    ([name, count]) => count,
   )
   return {
     author: name,
@@ -40,7 +40,7 @@ const mostLikes = (blogs) => {
     likes: _.sumBy(group, 'likes'),
   }))
 
-  const mostLikes = _.maxBy(groupSumLikes,'likes') 
+  const mostLikes = _.maxBy(groupSumLikes, 'likes')
   return mostLikes
 }
 

@@ -29,7 +29,7 @@ const update = async (newObject) => {
   const response = await axios.put(
     `${baseUrl}/${newObject.id}`,
     newObject,
-    config
+    config,
   )
   return response.data
 }
