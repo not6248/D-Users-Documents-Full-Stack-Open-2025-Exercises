@@ -5,14 +5,19 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
+import {
+  setNotification,
+  clearNotification,
+} from './reducers/notificationReducer'
+import { useDispatch } from 'react-redux'
 
 const App = () => {
+  const dispatch = useDispatch()
+
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [message, setMessage] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
   const blogFormRef = useRef()
 
   useEffect(() => {
@@ -30,6 +35,23 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
+
+  const setErrorMessage = (message) => {
+    dispatch(
+      setNotification({
+        message: message,
+        isError: true,
+      }),
+    )
+  }
+
+  const setMessage = (message) => {
+    dispatch(
+      setNotification({
+        message: message,
+      }),
+    )
+  }
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -49,7 +71,7 @@ const App = () => {
       }
 
       setTimeout(() => {
-        setErrorMessage(null)
+        dispatch(clearNotification())
       }, 3000)
     }
   }
@@ -66,13 +88,13 @@ const App = () => {
       blogFormRef.current.toggleVisibility()
       setMessage(`a new blog ${returnedBlog.title} added`)
       setTimeout(() => {
-        setMessage(null)
+        dispatch(clearNotification())
       }, 3000)
     } catch {
       setErrorMessage('has error')
 
       setTimeout(() => {
-        setErrorMessage(null)
+        dispatch(clearNotification())
       }, 3000)
     }
   }
@@ -89,7 +111,7 @@ const App = () => {
       setErrorMessage('has error')
 
       setTimeout(() => {
-        setErrorMessage(null)
+        dispatch(clearNotification())
       }, 3000)
     }
   }
@@ -103,7 +125,7 @@ const App = () => {
       setErrorMessage('has error')
 
       setTimeout(() => {
-        setErrorMessage(null)
+        dispatch(clearNotification())
       }, 3000)
     }
   }
@@ -112,8 +134,7 @@ const App = () => {
     return (
       <div>
         <h2>log in to application</h2>
-        <Notification message={message} />
-        <Notification message={errorMessage} isError={true} />
+        <Notification />
 
         <form onSubmit={handleLogin}>
           <div>
@@ -145,8 +166,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <Notification message={message} />
-      <Notification message={errorMessage} isError={true} />
+      <Notification />
 
       <form onSubmit={handleLogout}>
         <p>
