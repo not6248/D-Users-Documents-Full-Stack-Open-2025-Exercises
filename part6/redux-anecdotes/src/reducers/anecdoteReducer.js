@@ -3,23 +3,25 @@ import anecdoteService from '../services/anecdotes'
 
 const anecdoteSlice = createSlice({
   name: 'anecdotes',
-  initialState : [],
+  initialState: [],
   reducers: {
-    createAnecdotes(state, action){
+    setAnecdotes(state, action) {
+      return action.payload
+    },
+    createAnecdote(state, action) {
       state.push(action.payload)
     },
-    replaceOf(state,action){
+    replaceOf(state, action) {
       const id = action.payload.id
       const changedAnecdotes = action.payload
-      return state.map(anecdotes => (anecdotes.id !== id ? anecdotes : changedAnecdotes))
+      return state.map((anecdote) =>
+        anecdote.id !== id ? anecdote : changedAnecdotes,
+      )
     },
-    setAnecdotes(state, action){
-      return action.payload
-    }
-  }
+  },
 })
 
-const { setAnecdotes, createAnecdotes ,replaceOf} = anecdoteSlice.actions
+const { setAnecdotes, createAnecdote, replaceOf } = anecdoteSlice.actions
 
 export const initializeAnecdote = () => {
   return async (dispatch) => {
@@ -31,7 +33,7 @@ export const initializeAnecdote = () => {
 export const appendAnecdote = (content) => {
   return async (dispatch) => {
     const newAnecdote = await anecdoteService.createNew(content)
-    dispatch(createAnecdotes(newAnecdote))
+    dispatch(createAnecdote(newAnecdote))
   }
 }
 
@@ -40,14 +42,14 @@ export const voteOf = (content) => {
     const id = content
     const anecdotes = await anecdoteService.getAll()
 
-    const anecdotesToChange = anecdotes.find(n => n.id === id)
+    const anecdotesToChange = anecdotes.find((n) => n.id === id)
 
     const changedAnecdotes = {
       ...anecdotesToChange,
-      votes: anecdotesToChange.votes + 1
+      votes: anecdotesToChange.votes + 1,
     }
 
-    const updatedAnecdote = await anecdoteService.update(id,changedAnecdotes)
+    const updatedAnecdote = await anecdoteService.update(id, changedAnecdotes)
     dispatch(replaceOf(updatedAnecdote))
   }
 }
