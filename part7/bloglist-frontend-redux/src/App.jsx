@@ -5,27 +5,32 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
+
+import { useDispatch, useSelector } from 'react-redux'
 import {
   setNotification,
   clearNotification,
 } from './reducers/notificationReducer'
-import { useDispatch } from 'react-redux'
+import {
+  initializeBlog,
+  appendBlog,
+  likeOf,
+  deleteBlogOf,
+} from './reducers/blogReducer'
 
 const App = () => {
   const dispatch = useDispatch()
 
-  const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const blogFormRef = useRef()
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => {
-      blogs.sort((a, b) => b.likes - a.likes)
-      setBlogs(blogs)
-    })
-  }, [])
+    dispatch(initializeBlog())
+  }, [dispatch])
+
+  const blogs = [...useSelector((state) => state.blog)]
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
@@ -82,11 +87,9 @@ const App = () => {
 
   const addBlog = async (blogObject) => {
     try {
-      const returnedBlog = await blogService.create(blogObject)
-      setBlogs(blogs.concat(returnedBlog))
-
+      dispatch(appendBlog(blogObject))
       blogFormRef.current.toggleVisibility()
-      setMessage(`a new blog ${returnedBlog.title} added`)
+      setMessage(`a new blog ${blogObject.title} added`)
       setTimeout(() => {
         dispatch(clearNotification())
       }, 3000)
@@ -101,12 +104,7 @@ const App = () => {
 
   const addLike = async (blogObject) => {
     try {
-      const returnedBlog = await blogService.update(blogObject)
-      setBlogs((prevItems) =>
-        prevItems
-          .map((blog) => (blog.id === returnedBlog.id ? returnedBlog : blog))
-          .sort((a, b) => b.likes - a.likes),
-      )
+      dispatch(likeOf(blogObject.id))
     } catch {
       setErrorMessage('has error')
 
@@ -118,9 +116,7 @@ const App = () => {
 
   const deleteBlog = async (id) => {
     try {
-      await blogService.deleteData(id)
-      const newBlogs = blogs.filter((blog) => blog.id !== id)
-      setBlogs(newBlogs)
+      dispatch(deleteBlogOf(id))
     } catch {
       setErrorMessage('has error')
 
@@ -153,6 +149,7 @@ const App = () => {
               <input
                 type="password"
                 value={password}
+                autoComplete="true"
                 onChange={({ target }) => setPassword(target.value)}
               />
             </label>
