@@ -17,13 +17,13 @@ import {
   likeOf,
   deleteBlogOf,
 } from './reducers/blogReducer'
+import { setUser } from './reducers/userReducer'
 
 const App = () => {
   const dispatch = useDispatch()
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
   const blogFormRef = useRef()
 
   useEffect(() => {
@@ -31,15 +31,16 @@ const App = () => {
   }, [dispatch])
 
   const blogs = [...useSelector((state) => state.blog)]
+  const user = useSelector((state) => state.user)
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      blogService.setToken(user.token)
+      const oggedUser = JSON.parse(loggedUserJSON)
+      dispatch(setUser(oggedUser))
+      blogService.setToken(oggedUser.token)
     }
-  }, [])
+  }, [dispatch])
 
   const setErrorMessage = (message) => {
     dispatch(
@@ -65,7 +66,7 @@ const App = () => {
       const user = await loginService.login({ username, password })
       window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
       blogService.setToken(user.token)
-      setUser(user)
+      dispatch(setUser(user))
       setUsername('')
       setPassword('')
     } catch (ex) {
