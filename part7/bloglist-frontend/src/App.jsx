@@ -1,18 +1,20 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useContext } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
+import NotificationContext from './NotificationContext'
 
 const App = () => {
+  const { notificationDispatch } = useContext(NotificationContext)
+
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [message, setMessage] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
+
   const blogFormRef = useRef()
 
   useEffect(() => {
@@ -43,13 +45,25 @@ const App = () => {
       setPassword('')
     } catch (ex) {
       if (ex.response.data.error === 'invalid username or password') {
-        setErrorMessage('wrong credentials')
+        notificationDispatch({
+          type: 'setNotificationValue',
+          playload: {
+            message: `wrong credentials`,
+            isError: true,
+          },
+        })
       } else {
-        setErrorMessage('has error')
+        notificationDispatch({
+          type: 'setNotificationValue',
+          playload: {
+            message: `has error`,
+            isError: true,
+          },
+        })
       }
 
       setTimeout(() => {
-        setErrorMessage(null)
+        notificationDispatch({ type: 'clearNotification' })
       }, 3000)
     }
   }
@@ -64,15 +78,26 @@ const App = () => {
       setBlogs(blogs.concat(returnedBlog))
 
       blogFormRef.current.toggleVisibility()
-      setMessage(`a new blog ${returnedBlog.title} added`)
+      notificationDispatch({
+        type: 'setNotificationValue',
+        playload: {
+          message: `a new blog ${returnedBlog.title} added`,
+          isError: false,
+        },
+      })
       setTimeout(() => {
-        setMessage(null)
+        notificationDispatch({ type: 'clearNotification' })
       }, 3000)
     } catch {
-      setErrorMessage('has error')
-
+      notificationDispatch({
+        type: 'setNotificationValue',
+        playload: {
+          message: `has error`,
+          isError: true,
+        },
+      })
       setTimeout(() => {
-        setErrorMessage(null)
+        notificationDispatch({ type: 'clearNotification' })
       }, 3000)
     }
   }
@@ -86,10 +111,15 @@ const App = () => {
           .sort((a, b) => b.likes - a.likes),
       )
     } catch {
-      setErrorMessage('has error')
-
+      notificationDispatch({
+        type: 'setNotificationValue',
+        playload: {
+          message: `has error`,
+          isError: true,
+        },
+      })
       setTimeout(() => {
-        setErrorMessage(null)
+        notificationDispatch({ type: 'clearNotification' })
       }, 3000)
     }
   }
@@ -100,10 +130,15 @@ const App = () => {
       const newBlogs = blogs.filter((blog) => blog.id !== id)
       setBlogs(newBlogs)
     } catch {
-      setErrorMessage('has error')
-
+      notificationDispatch({
+        type: 'setNotificationValue',
+        playload: {
+          message: `has error`,
+          isError: true,
+        },
+      })
       setTimeout(() => {
-        setErrorMessage(null)
+        notificationDispatch({ type: 'clearNotification' })
       }, 3000)
     }
   }
@@ -112,8 +147,7 @@ const App = () => {
     return (
       <div>
         <h2>log in to application</h2>
-        <Notification message={message} />
-        <Notification message={errorMessage} isError={true} />
+        <Notification />
 
         <form onSubmit={handleLogin}>
           <div>
@@ -145,8 +179,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <Notification message={message} />
-      <Notification message={errorMessage} isError={true} />
+      <Notification />
 
       <form onSubmit={handleLogout}>
         <p>
