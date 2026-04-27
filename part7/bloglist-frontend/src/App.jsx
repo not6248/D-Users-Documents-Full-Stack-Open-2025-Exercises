@@ -6,23 +6,71 @@ import loginService from './services/login'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
 import NotificationContext from './NotificationContext'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 const App = () => {
   const { notificationDispatch } = useContext(NotificationContext)
 
-  const [blogs, setBlogs] = useState([])
+  const queryClient = useQueryClient()
+
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
 
   const blogFormRef = useRef()
 
-  useEffect(() => {
-    blogService.getAll().then((blogs) => {
-      blogs.sort((a, b) => b.likes - a.likes)
-      setBlogs(blogs)
-    })
-  }, [])
+  const getAllBlog = async () => {
+    const blogs = await blogService.getAll()
+    return [...blogs].sort((a, b) => b.likes - a.likes)
+  }
+
+  const createBlog = useMutation({
+    mutationFn: blogService.create,
+    onSuccess: (newBlog) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      queryClient.setQueryData(['blogs'], blogs.concat(newBlog))
+
+      notificationDispatch({
+        type: 'setNotificationValue',
+        playload: {
+          message: `a new blog ${newBlog.title} added`,
+          isError: false,
+        },
+      })
+      setTimeout(() => {
+        notificationDispatch({ type: 'clearNotification' })
+      }, 3000)
+      blogFormRef.current.toggleVisibility()
+    },
+  })
+
+  const addBlog = async (blogObject) => {
+    try {
+      createBlog.mutate(blogObject)
+    } catch {
+      notificationDispatch({
+        type: 'setNotificationValue',
+        playload: {
+          message: `has error`,
+          isError: true,
+        },
+      })
+      setTimeout(() => {
+        notificationDispatch({ type: 'clearNotification' })
+      }, 3000)
+    }
+  }
+
+  const result = useQuery({
+    queryKey: ['blogs'],
+    queryFn: getAllBlog,
+    refetchOnWindowFocus: false,
+    retry: 1,
+  })
+
+  console.log(result.data)
+
+  const blogs = result.data
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
@@ -72,44 +120,14 @@ const App = () => {
     window.localStorage.removeItem('loggedNoteappUser')
   }
 
-  const addBlog = async (blogObject) => {
-    try {
-      const returnedBlog = await blogService.create(blogObject)
-      setBlogs(blogs.concat(returnedBlog))
-
-      blogFormRef.current.toggleVisibility()
-      notificationDispatch({
-        type: 'setNotificationValue',
-        playload: {
-          message: `a new blog ${returnedBlog.title} added`,
-          isError: false,
-        },
-      })
-      setTimeout(() => {
-        notificationDispatch({ type: 'clearNotification' })
-      }, 3000)
-    } catch {
-      notificationDispatch({
-        type: 'setNotificationValue',
-        playload: {
-          message: `has error`,
-          isError: true,
-        },
-      })
-      setTimeout(() => {
-        notificationDispatch({ type: 'clearNotification' })
-      }, 3000)
-    }
-  }
-
   const addLike = async (blogObject) => {
     try {
       const returnedBlog = await blogService.update(blogObject)
-      setBlogs((prevItems) =>
-        prevItems
-          .map((blog) => (blog.id === returnedBlog.id ? returnedBlog : blog))
-          .sort((a, b) => b.likes - a.likes),
-      )
+      // setBlogs((prevItems) =>
+      //   prevItems
+      //     .map((blog) => (blog.id === returnedBlog.id ? returnedBlog : blog))
+      //     .sort((a, b) => b.likes - a.likes),
+      // )
     } catch {
       notificationDispatch({
         type: 'setNotificationValue',
@@ -127,8 +145,8 @@ const App = () => {
   const deleteBlog = async (id) => {
     try {
       await blogService.deleteData(id)
-      const newBlogs = blogs.filter((blog) => blog.id !== id)
-      setBlogs(newBlogs)
+      // const newBlogs = blogs.filter((blog) => blog.id !== id)
+      // setBlogs(newBlogs)
     } catch {
       notificationDispatch({
         type: 'setNotificationValue',
@@ -190,7 +208,7 @@ const App = () => {
       <Togglable buttonLabel="create new blog" ref={blogFormRef}>
         <BlogForm createBlog={addBlog} />
       </Togglable>
-      {blogs.map((blog) => (
+      {blogs?.map((blog) => (
         <Blog
           addLike={addLike}
           deleteBlog={deleteBlog}
