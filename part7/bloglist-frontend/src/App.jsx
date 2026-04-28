@@ -19,59 +19,6 @@ const App = () => {
 
   const blogFormRef = useRef()
 
-  const getAllBlog = async () => {
-    const blogs = await blogService.getAll()
-    return [...blogs].sort((a, b) => b.likes - a.likes)
-  }
-
-  const createBlog = useMutation({
-    mutationFn: blogService.create,
-    onSuccess: (newBlog) => {
-      const blogs = queryClient.getQueryData(['blogs'])
-      queryClient.setQueryData(['blogs'], blogs.concat(newBlog))
-
-      notificationDispatch({
-        type: 'setNotificationValue',
-        playload: {
-          message: `a new blog ${newBlog.title} added`,
-          isError: false,
-        },
-      })
-      setTimeout(() => {
-        notificationDispatch({ type: 'clearNotification' })
-      }, 3000)
-      blogFormRef.current.toggleVisibility()
-    },
-  })
-
-  const addBlog = async (blogObject) => {
-    try {
-      createBlog.mutate(blogObject)
-    } catch {
-      notificationDispatch({
-        type: 'setNotificationValue',
-        playload: {
-          message: `has error`,
-          isError: true,
-        },
-      })
-      setTimeout(() => {
-        notificationDispatch({ type: 'clearNotification' })
-      }, 3000)
-    }
-  }
-
-  const result = useQuery({
-    queryKey: ['blogs'],
-    queryFn: getAllBlog,
-    refetchOnWindowFocus: false,
-    retry: 1,
-  })
-
-  console.log(result.data)
-
-  const blogs = result.data
-
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
@@ -120,14 +67,34 @@ const App = () => {
     window.localStorage.removeItem('loggedNoteappUser')
   }
 
-  const addLike = async (blogObject) => {
+  const getAllBlog = async () => {
+    const blogs = await blogService.getAll()
+    return [...blogs].sort((a, b) => b.likes - a.likes)
+  }
+
+  const createBlog = useMutation({
+    mutationFn: blogService.create,
+    onSuccess: (newBlog) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      queryClient.setQueryData(['blogs'], blogs.concat(newBlog))
+
+      notificationDispatch({
+        type: 'setNotificationValue',
+        playload: {
+          message: `a new blog ${newBlog.title} added`,
+          isError: false,
+        },
+      })
+      setTimeout(() => {
+        notificationDispatch({ type: 'clearNotification' })
+      }, 3000)
+      blogFormRef.current.toggleVisibility()
+    },
+  })
+
+  const addBlog = async (blogObject) => {
     try {
-      const returnedBlog = await blogService.update(blogObject)
-      // setBlogs((prevItems) =>
-      //   prevItems
-      //     .map((blog) => (blog.id === returnedBlog.id ? returnedBlog : blog))
-      //     .sort((a, b) => b.likes - a.likes),
-      // )
+      createBlog.mutate(blogObject)
     } catch {
       notificationDispatch({
         type: 'setNotificationValue',
@@ -142,11 +109,29 @@ const App = () => {
     }
   }
 
-  const deleteBlog = async (id) => {
+  const updateBlog = useMutation({
+    mutationFn: blogService.update,
+    onSuccess: (returnedBlog) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      const updatedBlog = blogs
+        .map((blog) => (blog.id === returnedBlog.id ? returnedBlog : blog))
+        .sort((a, b) => b.likes - a.likes)
+      queryClient.setQueryData(['blogs'], updatedBlog)
+    },
+  })
+
+  const deleteBlog = useMutation({
+    mutationFn: blogService.deleteData,
+    onSuccess: (_, deletedId) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      const updatedBlog = blogs.filter((blog) => blog.id !== deletedId)
+      queryClient.setQueryData(['blogs'], updatedBlog)
+    },
+  })
+
+  const handleLike = async (blogObject) => {
     try {
-      await blogService.deleteData(id)
-      // const newBlogs = blogs.filter((blog) => blog.id !== id)
-      // setBlogs(newBlogs)
+      updateBlog.mutate(blogObject)
     } catch {
       notificationDispatch({
         type: 'setNotificationValue',
@@ -160,6 +145,32 @@ const App = () => {
       }, 3000)
     }
   }
+
+  const handleDeleteBlog = async (id) => {
+    try {
+      deleteBlog.mutate(id)
+    } catch {
+      notificationDispatch({
+        type: 'setNotificationValue',
+        playload: {
+          message: `has error`,
+          isError: true,
+        },
+      })
+      setTimeout(() => {
+        notificationDispatch({ type: 'clearNotification' })
+      }, 3000)
+    }
+  }
+
+  const result = useQuery({
+    queryKey: ['blogs'],
+    queryFn: getAllBlog,
+    refetchOnWindowFocus: false,
+    retry: 1,
+  })
+
+  const blogs = result.data
 
   if (user === null) {
     return (
@@ -210,8 +221,8 @@ const App = () => {
       </Togglable>
       {blogs?.map((blog) => (
         <Blog
-          addLike={addLike}
-          deleteBlog={deleteBlog}
+          addLike={handleLike}
+          deleteBlog={handleDeleteBlog}
           user={user}
           key={blog.id}
           blog={blog}
