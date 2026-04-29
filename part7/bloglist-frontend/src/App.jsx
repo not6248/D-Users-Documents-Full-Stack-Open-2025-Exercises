@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useContext } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
@@ -6,16 +7,16 @@ import loginService from './services/login'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
 import NotificationContext from './NotificationContext'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import UserContext from './UserContext'
 
 const App = () => {
   const { notificationDispatch } = useContext(NotificationContext)
+  const { user, userDispatch } = useContext(UserContext)
 
   const queryClient = useQueryClient()
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
 
   const blogFormRef = useRef()
 
@@ -23,10 +24,13 @@ const App = () => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      setUser(user)
+      userDispatch({
+        type: 'setUserValue',
+        playload: user,
+      })
       blogService.setToken(user.token)
     }
-  }, [])
+  }, [userDispatch])
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -35,7 +39,10 @@ const App = () => {
       const user = await loginService.login({ username, password })
       window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
       blogService.setToken(user.token)
-      setUser(user)
+      userDispatch({
+        type: 'setUserValue',
+        playload: user,
+      })
       setUsername('')
       setPassword('')
     } catch (ex) {
