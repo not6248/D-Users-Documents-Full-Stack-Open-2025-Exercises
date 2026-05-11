@@ -1,13 +1,138 @@
-import { useState, useEffect, useRef, useContext } from 'react'
+import { useState, useEffect, useRef, useContext, Fragment } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import usersService from './services/users'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
 import NotificationContext from './NotificationContext'
 import UserContext from './UserContext'
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useNavigate,
+  Outlet,
+  Navigate,
+} from 'react-router'
+
+const BlogList = ({ blogs, handleLike, handleDeleteBlog, user }) => {
+  return (
+    <>
+      {blogs?.map((blog) => (
+        <Blog
+          addLike={handleLike}
+          deleteBlog={handleDeleteBlog}
+          user={user}
+          key={blog.id}
+          blog={blog}
+        />
+      ))}
+    </>
+  )
+}
+
+const UserInfo = () => {
+  const [users, setUsers] = useState(null)
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const users = await usersService.getAll()
+      setUsers(users)
+    }
+
+    fetchUsers()
+  }, [])
+  return (
+    <>
+      <h2>Users</h2>
+      <table>
+        {users?.map((user) => (
+          <Fragment key={user.id}>
+            <thead>
+              <tr>
+                <th></th>
+                <th>blogs createds</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{user.username}</td>
+                <td>{user.blogs?.length ?? ''}</td>
+              </tr>
+            </tbody>
+          </Fragment>
+        ))}
+      </table>
+    </>
+  )
+}
+
+const Login = ({
+  handleLogin,
+  username,
+  setUsername,
+  password,
+  setPassword,
+}) => {
+  return (
+    <form onSubmit={handleLogin}>
+      <div>
+        <label>
+          username
+          <input
+            type="text"
+            value={username}
+            onChange={({ target }) => setUsername(target.value)}
+          />
+        </label>
+      </div>
+      <div>
+        <label>
+          password
+          <input
+            type="password"
+            value={password}
+            onChange={({ target }) => setPassword(target.value)}
+          />
+        </label>
+      </div>
+      <button type="submit">login</button>
+    </form>
+  )
+}
+
+const Blogs = ({
+  user,
+  blogFormRef,
+  addBlog,
+  blogs,
+  handleLike,
+  handleDeleteBlog,
+}) => (
+  <>
+    <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+      <BlogForm createBlog={addBlog} />
+    </Togglable>
+    <BlogList
+      blogs={blogs}
+      handleLike={handleLike}
+      handleDeleteBlog={handleDeleteBlog}
+      user={user}
+    />
+  </>
+)
+
+const Logout = ({ handleLogout, user }) => {
+  return (
+    <form onSubmit={handleLogout}>
+      <p>{user.name} logged in</p>
+      <button type="submit">logout</button>
+    </form>
+  )
+}
 
 const App = () => {
   const { notificationDispatch } = useContext(NotificationContext)
@@ -17,6 +142,7 @@ const App = () => {
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [isLoading, setIsloading] = useState(true)
 
   const blogFormRef = useRef()
 
@@ -30,7 +156,9 @@ const App = () => {
       })
       blogService.setToken(user.token)
     }
-  }, [userDispatch])
+
+    setIsloading(false)
+  }, [userDispatch, setIsloading])
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -70,8 +198,12 @@ const App = () => {
     }
   }
 
-  const handleLogout = () => {
+  const navigate = useNavigate()
+
+  const handleLogout = (event) => {
+    event.preventDefault()
     window.localStorage.removeItem('loggedNoteappUser')
+    navigate(0)
   }
 
   const getAllBlog = async () => {
@@ -179,63 +311,57 @@ const App = () => {
 
   const blogs = result.data
 
-  if (user === null) {
-    return (
-      <div>
-        <h2>log in to application</h2>
-        <Notification />
-
-        <form onSubmit={handleLogin}>
-          <div>
-            <label>
-              username
-              <input
-                type="text"
-                value={username}
-                onChange={({ target }) => setUsername(target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              password
-              <input
-                type="password"
-                value={password}
-                onChange={({ target }) => setPassword(target.value)}
-              />
-            </label>
-          </div>
-          <button type="submit">login</button>
-        </form>
-      </div>
+  const homeElement =
+    user === null ? (
+      <Login
+        handleLogin={handleLogin}
+        username={username}
+        setUsername={setUsername}
+        password={password}
+        setPassword={setPassword}
+      />
+    ) : (
+      <Logout handleLogout={handleLogout} user={user} />
     )
-  }
+
+  if (isLoading) return
 
   return (
-    <div>
-      <h2>blogs</h2>
-      <Notification />
-
-      <form onSubmit={handleLogout}>
-        <p>
-          {user.name} logged in
-          <button type="submit">logout</button>
-        </p>
-      </form>
-      <Togglable buttonLabel="create new blog" ref={blogFormRef}>
-        <BlogForm createBlog={addBlog} />
-      </Togglable>
-      {blogs?.map((blog) => (
-        <Blog
-          addLike={handleLike}
-          deleteBlog={handleDeleteBlog}
-          user={user}
-          key={blog.id}
-          blog={blog}
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <>
+            <h2>{user === null ? 'log in to application' : 'blogs'}</h2>
+            <Notification />
+            {homeElement}
+            <Outlet />
+          </>
+        }
+      >
+        <Route
+          index
+          element={
+            user === null ? (
+              <Navigate to="/" replace />
+            ) : (
+              <Blogs
+                user={user}
+                blogFormRef={blogFormRef}
+                addBlog={addBlog}
+                blogs={blogs}
+                handleLike={handleLike}
+                handleDeleteBlog={handleDeleteBlog}
+              />
+            )
+          }
         />
-      ))}
-    </div>
+        <Route
+          path="users"
+          element={user === null ? <Navigate to="/" replace /> : <UserInfo />}
+        />
+      </Route>
+    </Routes>
   )
 }
 
