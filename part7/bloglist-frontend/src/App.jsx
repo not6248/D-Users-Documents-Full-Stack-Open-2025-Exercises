@@ -16,6 +16,8 @@ import {
   useNavigate,
   Outlet,
   Navigate,
+  Link,
+  useMatch,
 } from 'react-router'
 
 const BlogList = ({ blogs, handleLike, handleDeleteBlog, user }) => {
@@ -59,13 +61,42 @@ const UserInfo = () => {
             </thead>
             <tbody>
               <tr>
-                <td>{user.username}</td>
+                <td>
+                  <Link to={user.id}>{user.username}</Link>
+                </td>
                 <td>{user.blogs?.length ?? ''}</td>
               </tr>
             </tbody>
           </Fragment>
         ))}
       </table>
+    </>
+  )
+}
+
+const UserAdded = ({ userId }) => {
+  const [userDetail, setUserDetail] = useState(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await usersService.get(userId)
+      setUserDetail(res)
+    }
+
+    fetchData()
+  }, [userId])
+
+  if (!userDetail) return
+
+  return (
+    <>
+      <h2>{userDetail?.username}</h2>
+      <h4>added blogs</h4>
+      <ul>
+        {userDetail.blogs?.map((blog) => (
+          <li key={blog.id}>{blog.title}</li>
+        ))}
+      </ul>
     </>
   )
 }
@@ -311,6 +342,10 @@ const App = () => {
 
   const blogs = result.data
 
+  const match = useMatch('/users/:id')
+
+  const userId = match ? match.params.id : null
+
   const homeElement =
     user === null ? (
       <Login
@@ -359,6 +394,16 @@ const App = () => {
         <Route
           path="users"
           element={user === null ? <Navigate to="/" replace /> : <UserInfo />}
+        />
+        <Route
+          path="users/:id"
+          element={
+            user === null ? (
+              <Navigate to="/" replace />
+            ) : (
+              <UserAdded userId={userId} />
+            )
+          }
         />
       </Route>
     </Routes>
