@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useContext, Fragment } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Blog from './components/Blog'
+import BlogDetail from './components/BlogDetail'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -18,19 +19,14 @@ import {
   Navigate,
   Link,
   useMatch,
+  NavLink,
 } from 'react-router'
 
-const BlogList = ({ blogs, handleLike, handleDeleteBlog, user }) => {
+const BlogList = ({ blogs }) => {
   return (
     <>
       {blogs?.map((blog) => (
-        <Blog
-          addLike={handleLike}
-          deleteBlog={handleDeleteBlog}
-          user={user}
-          key={blog.id}
-          blog={blog}
-        />
+        <Blog key={blog.id} blog={blog} />
       ))}
     </>
   )
@@ -135,33 +131,27 @@ const Login = ({
   )
 }
 
-const Blogs = ({
-  user,
-  blogFormRef,
-  addBlog,
-  blogs,
-  handleLike,
-  handleDeleteBlog,
-}) => (
+const Blogs = ({ blogFormRef, addBlog, blogs }) => (
   <>
     <Togglable buttonLabel="create new blog" ref={blogFormRef}>
       <BlogForm createBlog={addBlog} />
     </Togglable>
-    <BlogList
-      blogs={blogs}
-      handleLike={handleLike}
-      handleDeleteBlog={handleDeleteBlog}
-      user={user}
-    />
+    <BlogList blogs={blogs} />
   </>
 )
 
 const Logout = ({ handleLogout, user }) => {
+  const style = {
+    display: 'inline-block',
+  }
+
   return (
-    <form onSubmit={handleLogout}>
-      <p>{user.name} logged in</p>
-      <button type="submit">logout</button>
-    </form>
+    <>
+      <span>{user.name} logged in</span>
+      <form style={style} onSubmit={handleLogout}>
+        <button type="submit">logout</button>
+      </form>
+    </>
   )
 }
 
@@ -296,6 +286,7 @@ const App = () => {
       const blogs = queryClient.getQueryData(['blogs'])
       const updatedBlog = blogs.filter((blog) => blog.id !== deletedId)
       queryClient.setQueryData(['blogs'], updatedBlog)
+      navigate('/')
     },
   })
 
@@ -342,22 +333,44 @@ const App = () => {
 
   const blogs = result.data
 
-  const match = useMatch('/users/:id')
+  const matchUser = useMatch('/users/:id')
+  const matchBlog = useMatch('/blogs/:id')
 
-  const userId = match ? match.params.id : null
+  const userId = matchUser ? matchUser.params.id : null
+  const blog = matchBlog
+    ? blogs?.find((b) => b.id === matchBlog.params.id)
+    : null
 
-  const homeElement =
-    user === null ? (
-      <Login
-        handleLogin={handleLogin}
-        username={username}
-        setUsername={setUsername}
-        password={password}
-        setPassword={setPassword}
-      />
-    ) : (
-      <Logout handleLogout={handleLogout} user={user} />
+  const LoginElement = user === null && (
+    <Login
+      handleLogin={handleLogin}
+      username={username}
+      setUsername={setUsername}
+      password={password}
+      setPassword={setPassword}
+    />
+  )
+
+  const NavBar = ({ children }) => {
+    const style = {
+      display: 'flex',
+      gap: '5px',
+      backgroundColor: 'lightgray',
+      padding: '5px',
+    }
+
+    return (
+      <nav style={style}>
+        <NavLink to="/" end>
+          blogs
+        </NavLink>
+        <NavLink to="/users" end>
+          users
+        </NavLink>
+        {children}
+      </nav>
     )
+  }
 
   if (isLoading) return
 
@@ -367,9 +380,16 @@ const App = () => {
         path="/"
         element={
           <>
+            {user !== null && (
+              <>
+                <NavBar>
+                  <Logout handleLogout={handleLogout} user={user} />
+                </NavBar>
+              </>
+            )}
             <h2>{user === null ? 'log in to application' : 'blogs'}</h2>
             <Notification />
-            {homeElement}
+            {LoginElement}
             <Outlet />
           </>
         }
@@ -402,6 +422,23 @@ const App = () => {
               <Navigate to="/" replace />
             ) : (
               <UserAdded userId={userId} />
+            )
+          }
+        />
+        <Route
+          path="blogs/:id"
+          element={
+            user === null ? (
+              <Navigate to="/" replace />
+            ) : (
+              <>
+                <BlogDetail
+                  user={user}
+                  blog={blog}
+                  addLike={handleLike}
+                  deleteBlog={handleDeleteBlog}
+                />
+              </>
             )
           }
         />
