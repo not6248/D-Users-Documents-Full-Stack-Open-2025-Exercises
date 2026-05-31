@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { Link } from 'react-router'
 
-const Blog = ({ user, blog, addLike, deleteBlog }) => {
+const Blog = ({ user, blog, addLike, deleteBlog, addComment }) => {
+  const [comment, setComment] = useState('')
   if (!blog) return
 
   const handleLike = (event) => {
@@ -10,6 +12,16 @@ const Blog = ({ user, blog, addLike, deleteBlog }) => {
       likes: blog.likes + 1,
     }
     addLike(updateBlog)
+  }
+
+  const handleComment = (event) => {
+    event.preventDefault()
+
+    addComment(blog.id, {
+      comments: comment,
+    })
+
+    setComment('')
   }
 
   const handleRemove = (event) => {
@@ -43,9 +55,17 @@ const Blog = ({ user, blog, addLike, deleteBlog }) => {
       </div>
       <div>
         <h3>comments</h3>
+        <form onSubmit={handleComment}>
+          <input
+            type="text"
+            value={comment}
+            onChange={(event) => setComment(event.target.value)}
+          />
+          <button type="submit">add comment</button>
+        </form>
         <ul>
-          {blog.comments?.map((comment) => (
-            <li>{comment}</li>
+          {blog.comments?.map((comment, index) => (
+            <li key={index}>{comment}</li>
           ))}
         </ul>
       </div>

@@ -280,6 +280,12 @@ const App = () => {
     },
   })
 
+  const addCommentBlog = useMutation({
+    mutationFn: ({ id, commentObject }) =>
+      blogService.createComment(id, commentObject),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['blogs'] }),
+  })
+
   const deleteBlog = useMutation({
     mutationFn: blogService.deleteData,
     onSuccess: (_, deletedId) => {
@@ -293,6 +299,23 @@ const App = () => {
   const handleLike = async (blogObject) => {
     try {
       updateBlog.mutate(blogObject)
+    } catch {
+      notificationDispatch({
+        type: 'setNotificationValue',
+        playload: {
+          message: `has error`,
+          isError: true,
+        },
+      })
+      setTimeout(() => {
+        notificationDispatch({ type: 'clearNotification' })
+      }, 3000)
+    }
+  }
+
+  const addComment = async (id, commentObject) => {
+    try {
+      addCommentBlog.mutate({ id, commentObject })
     } catch {
       notificationDispatch({
         type: 'setNotificationValue',
@@ -436,6 +459,7 @@ const App = () => {
                   user={user}
                   blog={blog}
                   addLike={handleLike}
+                  addComment={addComment}
                   deleteBlog={handleDeleteBlog}
                 />
               </>
