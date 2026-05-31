@@ -41,6 +41,14 @@ const Blog = ({ user, blog, addLike, deleteBlog }) => {
           </form>
         )}
       </div>
+      <div>
+        <h3>comments</h3>
+        <ul>
+          {blog.comments?.map((comment) => (
+            <li>{comment}</li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }

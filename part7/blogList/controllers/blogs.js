@@ -28,6 +28,25 @@ blogsRouter.post('/', userExtractor, async (request, response) => {
   response.status(201).json(savedBlog)
 })
 
+blogsRouter.post('/:id/comments', userExtractor, async (request, response) => {
+  const { comments } = request.body
+
+  const blog = await Blog.findById(request.params.id).populate('user', {
+    username: 1,
+    name: 1,
+  })
+
+  if (!blog) {
+    return response.status(404).end()
+  }
+
+  blog.comments = [...blog.comments,comments]
+
+  const updatedBlog = await blog.save()
+
+  response.status(201).json(updatedBlog)
+})
+
 blogsRouter.delete('/:id', userExtractor, async (request, response) => {
   const user = request.user
 
