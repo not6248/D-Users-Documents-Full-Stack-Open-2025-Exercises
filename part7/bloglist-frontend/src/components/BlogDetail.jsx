@@ -35,37 +35,58 @@ const Blog = ({ user, blog, addLike, deleteBlog, addComment }) => {
   return (
     <div>
       <div>
-        <h1>
-          {blog.title} {blog.author}
-        </h1>
-      </div>
-      <div>
-        <div>{blog.url}</div>
-        <div>
-          <form onSubmit={handleLike}>
-            likes {blog.likes} <button type="submit">like</button>
-          </form>
+        <div class="card bg-base-100 w-96 shadow-sm">
+          <div class="card-body">
+            <h2 class="card-title">
+              {blog.title} {blog.author}
+            </h2>
+            <div>{blog.url}</div>
+            <div>
+              <form onSubmit={handleLike}>
+                likes {blog.likes}{' '}
+                <button type="submit" className="btn">
+                  like
+                </button>
+              </form>
+            </div>
+            <div>added by {blog.user?.name}</div>
+            {user.name === blog.user?.name && (
+              <form onSubmit={handleRemove}>
+                <button type="submit" className="btn btn-error">
+                  remove
+                </button>
+              </form>
+            )}
+          </div>
         </div>
-        <div>added by {blog.user?.name}</div>
-        {user.name === blog.user?.name && (
-          <form onSubmit={handleRemove}>
-            <button type="submit">remove</button>
-          </form>
-        )}
       </div>
       <div>
         <h3>comments</h3>
         <form onSubmit={handleComment}>
-          <input
-            type="text"
-            value={comment}
-            onChange={(event) => setComment(event.target.value)}
-          />
-          <button type="submit">add comment</button>
+          <div class="join">
+            <input
+              type="text"
+              className="join-item input"
+              value={comment}
+              onChange={(event) => setComment(event.target.value)}
+            />
+            <button
+              type="submit"
+              className="btn join-item rounded-r-full h-auto"
+            >
+              add comment
+            </button>
+          </div>
         </form>
-        <ul>
+        <ul className="list bg-base-100 rounded-box shadow-md w-1/2">
           {blog.comments?.map((comment, index) => (
-            <li key={index}>{comment}</li>
+            <li key={index} className="list-row">
+              <div>
+                <div className="text-xs uppercase font-semibold opacity-60">
+                  {comment}
+                </div>
+              </div>
+            </li>
           ))}
         </ul>
       </div>

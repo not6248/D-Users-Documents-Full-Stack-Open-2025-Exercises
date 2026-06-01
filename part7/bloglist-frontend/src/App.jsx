@@ -24,11 +24,11 @@ import {
 
 const BlogList = ({ blogs }) => {
   return (
-    <>
+    <div className="mt-3 flex flex-col gap-1.5">
       {blogs?.map((blog) => (
         <Blog key={blog.id} blog={blog} />
       ))}
-    </>
+    </div>
   )
 }
 
@@ -44,9 +44,9 @@ const UserInfo = () => {
     fetchUsers()
   }, [])
   return (
-    <>
-      <h2>Users</h2>
-      <table>
+    <div>
+      <h2 className="my-2">Users</h2>
+      <table className="table w-1/2 shadow-sm">
         {users?.map((user) => (
           <Fragment key={user.id}>
             <thead>
@@ -66,7 +66,7 @@ const UserInfo = () => {
           </Fragment>
         ))}
       </table>
-    </>
+    </div>
   )
 }
 
@@ -88,9 +88,15 @@ const UserAdded = ({ userId }) => {
     <>
       <h2>{userDetail?.username}</h2>
       <h4>added blogs</h4>
-      <ul>
+      <ul className="list bg-base-100 rounded-box shadow-md w-1/2">
         {userDetail.blogs?.map((blog) => (
-          <li key={blog.id}>{blog.title}</li>
+          <li key={blog.id} className="list-row">
+            <div>
+              <div className="text-xs uppercase font-semibold opacity-60">
+                {blog.title}
+              </div>
+            </div>
+          </li>
         ))}
       </ul>
     </>
@@ -106,27 +112,36 @@ const Login = ({
 }) => {
   return (
     <form onSubmit={handleLogin}>
-      <div>
-        <label>
-          username
-          <input
-            type="text"
-            value={username}
-            onChange={({ target }) => setUsername(target.value)}
-          />
-        </label>
+      <div className="flex flex-col gap-2">
+        <div>
+          <label>
+            username:
+            <input
+              className="input"
+              placeholder="Type here"
+              type="text"
+              value={username}
+              onChange={({ target }) => setUsername(target.value)}
+            />
+          </label>
+        </div>
+        <div>
+          <label>
+            password:
+            <input
+              className="input"
+              placeholder="Type here"
+              type="password"
+              value={password}
+              onChange={({ target }) => setPassword(target.value)}
+            />
+          </label>
+        </div>
       </div>
-      <div>
-        <label>
-          password
-          <input
-            type="password"
-            value={password}
-            onChange={({ target }) => setPassword(target.value)}
-          />
-        </label>
-      </div>
-      <button type="submit">login</button>
+
+      <button type="submit" className="btn btn-success">
+        login
+      </button>
     </form>
   )
 }
@@ -146,12 +161,14 @@ const Logout = ({ handleLogout, user }) => {
   }
 
   return (
-    <>
+    <div className="flex gap-4 items-center ms-auto">
       <span>{user.name} logged in</span>
       <form style={style} onSubmit={handleLogout}>
-        <button type="submit">logout</button>
+        <button className="btn btn-warning" type="submit">
+          logout
+        </button>
       </form>
-    </>
+    </div>
   )
 }
 
@@ -375,19 +392,12 @@ const App = () => {
   )
 
   const NavBar = ({ children }) => {
-    const style = {
-      display: 'flex',
-      gap: '5px',
-      backgroundColor: 'lightgray',
-      padding: '5px',
-    }
-
     return (
-      <nav style={style}>
-        <NavLink to="/" end>
+      <nav className="p-2 items-center bg-base-200 shadow-sm flex gap-3">
+        <NavLink className={'link link-info'} to="/" end>
           blogs
         </NavLink>
-        <NavLink to="/users" end>
+        <NavLink className={'link link-info'} to="/users" end>
           users
         </NavLink>
         {children}
@@ -410,7 +420,9 @@ const App = () => {
                 </NavBar>
               </>
             )}
-            <h2>{user === null ? 'log in to application' : 'blogs'}</h2>
+            <h2 className="text-2xl m-2">
+              {user === null ? 'log in to application' : 'blog app'}
+            </h2>
             <Notification />
             {LoginElement}
             <Outlet />

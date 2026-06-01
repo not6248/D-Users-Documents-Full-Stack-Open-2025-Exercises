@@ -24,6 +24,8 @@ const BlogForm = ({ createBlog }) => {
         <label>
           title:
           <input
+            className="input"
+            placeholder="Type here"
             type="text"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
@@ -34,6 +36,8 @@ const BlogForm = ({ createBlog }) => {
         <label>
           author:
           <input
+            className="input"
+            placeholder="Type here"
             type="text"
             value={author}
             onChange={(event) => setAuthor(event.target.value)}
@@ -44,13 +48,17 @@ const BlogForm = ({ createBlog }) => {
         <label>
           url:
           <input
+            className="input"
+            placeholder="Type here"
             type="text"
             value={url}
             onChange={(event) => setUrl(event.target.value)}
           />
         </label>
       </div>
-      <button type="submit">create</button>
+      <button className="btn btn-success" type="submit">
+        create
+      </button>
     </form>
   )
 }

@@ -2,18 +2,10 @@
 import { Link } from 'react-router'
 
 const Blog = ({ blog }) => {
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5,
-  }
-
   return (
-    <div className="blog" style={blogStyle}>
+    <div className="blog card card-border bg-base-100 p-3">
       <div>
-        <Link to={`blogs/${blog.id}`}>
+        <Link className="link link-info" to={`blogs/${blog.id}`}>
           {blog.title} {blog.author}
         </Link>
       </div>
